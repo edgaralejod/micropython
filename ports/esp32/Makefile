@@ -9,8 +9,8 @@ BOARD ?= GENERIC
 BUILD ?= build-$(BOARD)
 
 # Device serial settings.
-PORT ?= /dev/ttyUSB0
-BAUD ?= 460800
+PORT ?= /dev/tty.usbserial-1430
+BAUD ?= 115200
 
 PYTHON ?= python3
 

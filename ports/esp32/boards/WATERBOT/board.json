@@ -1,0 +1,22 @@
+{
+    "deploy": [
+        "../deploy.md"
+    ],
+    "docs": "",
+    "features": [
+        "BLE",
+        "WiFi"
+    ],
+    "id": "waterbot",
+    "images": [
+        "esp32_devkitc.jpg"
+    ],
+    "mcu": "esp32",
+    "product": "WaterBot Control Board",
+    "thumbnail": "",
+    "url": "https://www.waterbot.com",
+    "variants": {
+        "idf3": "Compiled with IDF 4.2"
+    },
+    "vendor": "Waterbot"
+}
