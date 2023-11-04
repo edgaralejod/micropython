@@ -28,6 +28,9 @@
 
 #include <stdint.h>
 #include "sam.h"
+#include "clock_config.h"
+
+extern Sercom *sercom_instance[];
 
 void samd_init(void);
 void samd_main(void);
@@ -37,5 +40,12 @@ void USB_0_Handler_wrapper(void);
 void USB_1_Handler_wrapper(void);
 void USB_2_Handler_wrapper(void);
 void USB_3_Handler_wrapper(void);
+
+void sercom_enable(Sercom *spi, int state);
+void sercom_register_irq(int sercom_id, void (*sercom_irq_handler));
+
+#define SERCOM_IRQ_TYPE_UART  (0)
+#define SERCOM_IRQ_TYPE_SPI   (1)
+#define SERCOM_IRQ_TYPE_I2C   (2)
 
 #endif // MICROPY_INCLUDED_SAMD_SAMD_SOC_H

@@ -157,7 +157,7 @@ STATIC mp_obj_t madcblock_connect(size_t n_pos_args, const mp_obj_t *pos_args, m
         mp_raise_TypeError(MP_ERROR_TEXT("too many positional args"));
     }
 
-    const madc_obj_t *adc = madc_search_helper(self, channel_id, gpio_id);
+    const machine_adc_obj_t *adc = madc_search_helper(self, channel_id, gpio_id);
     if (adc != NULL) {
         madc_init_helper(adc, 0, pos_args + n_pos_args, kw_args);
         return MP_OBJ_FROM_PTR(adc);
@@ -194,10 +194,11 @@ STATIC const mp_rom_map_elem_t madcblock_locals_dict_table[] = {
 };
 STATIC MP_DEFINE_CONST_DICT(madcblock_locals_dict, madcblock_locals_dict_table);
 
-const mp_obj_type_t machine_adcblock_type = {
-    { &mp_type_type },
-    .name = MP_QSTR_ADCBlock,
-    .print = madcblock_print,
-    .make_new = madcblock_make_new,
-    .locals_dict = (mp_obj_t)&madcblock_locals_dict,
-};
+MP_DEFINE_CONST_OBJ_TYPE(
+    machine_adcblock_type,
+    MP_QSTR_ADCBlock,
+    MP_TYPE_FLAG_NONE,
+    make_new, madcblock_make_new,
+    print, madcblock_print,
+    locals_dict, &madcblock_locals_dict
+    );

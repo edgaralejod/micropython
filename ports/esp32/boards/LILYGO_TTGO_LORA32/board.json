@@ -5,13 +5,13 @@
     "docs": "",
     "features": [
         "BLE",
+        "Display",
+        "External Flash",
         "LoRa",
-        "OLED",
         "SDCard",
-        "USB-MICRO",
+        "USB",
         "WiFi"
     ],
-    "id": "esp32",
     "images": [
         "lilygo-ttgo-lora-32-v1-6.jpg"
     ],

@@ -131,7 +131,7 @@ typedef struct _mp_fun_table_t {
     void (*delete_global)(qstr qst);
     mp_obj_t (*new_closure)(mp_obj_t fun, size_t n_closed_over, const mp_obj_t *closed);
     void (*arg_check_num_sig)(size_t n_args, size_t n_kw, uint32_t sig);
-    void (*setup_code_state)(mp_code_state_t *code_state, size_t n_args, size_t n_kw, const mp_obj_t *args);
+    void (*setup_code_state_native)(mp_code_state_native_t *code_state, size_t n_args, size_t n_kw, const mp_obj_t *args);
     mp_int_t (*small_int_floor_divide)(mp_int_t num, mp_int_t denom);
     mp_int_t (*small_int_modulo)(mp_int_t dividend, mp_int_t divisor);
     bool (*yield_from)(mp_obj_t gen, mp_obj_t send_value, mp_obj_t *ret_value);
@@ -154,7 +154,7 @@ typedef struct _mp_fun_table_t {
     mp_obj_t (*obj_new_float_from_d)(double d);
     float (*obj_get_float_to_f)(mp_obj_t o);
     double (*obj_get_float_to_d)(mp_obj_t o);
-    void (*get_buffer_raise)(mp_obj_t obj, mp_buffer_info_t *bufinfo, mp_uint_t flags);
+    bool (*get_buffer)(mp_obj_t obj, mp_buffer_info_t *bufinfo, mp_uint_t flags);
     const mp_stream_p_t *(*get_stream_raise)(mp_obj_t self_in, int flags);
     const mp_print_t *plat_print;
     const mp_obj_type_t *type_type;

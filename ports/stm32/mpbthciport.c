@@ -24,12 +24,13 @@
  * THE SOFTWARE.
  */
 
+#include <stdio.h>
 #include "py/runtime.h"
 #include "py/mphal.h"
 #include "extmod/mpbthci.h"
 #include "extmod/modbluetooth.h"
+#include "shared/runtime/softtimer.h"
 #include "mpbthciport.h"
-#include "softtimer.h"
 #include "pendsv.h"
 #include "shared/runtime/mpirq.h"
 
@@ -99,10 +100,6 @@ void mp_bluetooth_hci_poll_now_default(void) {
 #include <string.h>
 #include "rfcore.h"
 
-STATIC uint16_t hci_uart_rx_buf_cur;
-STATIC uint16_t hci_uart_rx_buf_len;
-STATIC uint8_t hci_uart_rx_buf_data[256];
-
 int mp_bluetooth_hci_uart_init(uint32_t port, uint32_t baudrate) {
     (void)port;
     (void)baudrate;
@@ -110,8 +107,6 @@ int mp_bluetooth_hci_uart_init(uint32_t port, uint32_t baudrate) {
     DEBUG_printf("mp_bluetooth_hci_uart_init (stm32 rfcore)\n");
 
     rfcore_ble_init();
-    hci_uart_rx_buf_cur = 0;
-    hci_uart_rx_buf_len = 0;
 
     // Start the HCI polling to process any initial events/packets.
     mp_bluetooth_hci_start_polling();
@@ -121,7 +116,7 @@ int mp_bluetooth_hci_uart_init(uint32_t port, uint32_t baudrate) {
 
 int mp_bluetooth_hci_uart_deinit(void) {
     DEBUG_printf("mp_bluetooth_hci_uart_deinit (stm32 rfcore)\n");
-
+    rfcore_ble_reset();
     return 0;
 }
 
@@ -137,29 +132,17 @@ int mp_bluetooth_hci_uart_write(const uint8_t *buf, size_t len) {
     return 0;
 }
 
-// Callback to copy data into local hci_uart_rx_buf_data buffer for subsequent use.
-STATIC int mp_bluetooth_hci_uart_msg_cb(void *env, const uint8_t *buf, size_t len) {
-    (void)env;
-    if (hci_uart_rx_buf_len + len > MP_ARRAY_SIZE(hci_uart_rx_buf_data)) {
-        len = MP_ARRAY_SIZE(hci_uart_rx_buf_data) - hci_uart_rx_buf_len;
+// Callback to forward data from rfcore to the bluetooth hci handler.
+STATIC void mp_bluetooth_hci_uart_msg_cb(void *env, const uint8_t *buf, size_t len) {
+    mp_bluetooth_hci_uart_readchar_t handler = (mp_bluetooth_hci_uart_readchar_t)env;
+    for (size_t i = 0; i < len; ++i) {
+        handler(buf[i]);
     }
-    memcpy(hci_uart_rx_buf_data + hci_uart_rx_buf_len, buf, len);
-    hci_uart_rx_buf_len += len;
-    return 0;
 }
 
-int mp_bluetooth_hci_uart_readchar(void) {
-    if (hci_uart_rx_buf_cur >= hci_uart_rx_buf_len) {
-        hci_uart_rx_buf_cur = 0;
-        hci_uart_rx_buf_len = 0;
-        rfcore_ble_check_msg(mp_bluetooth_hci_uart_msg_cb, NULL);
-    }
-
-    if (hci_uart_rx_buf_cur < hci_uart_rx_buf_len) {
-        return hci_uart_rx_buf_data[hci_uart_rx_buf_cur++];
-    } else {
-        return -1;
-    }
+int mp_bluetooth_hci_uart_readpacket(mp_bluetooth_hci_uart_readchar_t handler) {
+    size_t len = rfcore_ble_check_msg(mp_bluetooth_hci_uart_msg_cb, (void *)handler);
+    return (len > 0) ? len : -1;
 }
 
 #else
@@ -167,9 +150,10 @@ int mp_bluetooth_hci_uart_readchar(void) {
 /******************************************************************************/
 // HCI over UART
 
+#include "extmod/modmachine.h"
 #include "uart.h"
 
-pyb_uart_obj_t mp_bluetooth_hci_uart_obj;
+machine_uart_obj_t mp_bluetooth_hci_uart_obj;
 mp_irq_obj_t mp_bluetooth_hci_uart_irq_obj;
 
 static uint8_t hci_uart_rxbuf[768];
@@ -186,13 +170,13 @@ int mp_bluetooth_hci_uart_init(uint32_t port, uint32_t baudrate) {
     DEBUG_printf("mp_bluetooth_hci_uart_init (stm32)\n");
 
     // bits (8), stop (1), parity (none) and flow (rts/cts) are assumed to match MYNEWT_VAL_BLE_HCI_UART_ constants in syscfg.h.
-    mp_bluetooth_hci_uart_obj.base.type = &pyb_uart_type;
+    mp_bluetooth_hci_uart_obj.base.type = &machine_uart_type;
     mp_bluetooth_hci_uart_obj.uart_id = port;
     mp_bluetooth_hci_uart_obj.is_static = true;
     // We don't want to block indefinitely, but expect flow control is doing its job.
     mp_bluetooth_hci_uart_obj.timeout = 200;
     mp_bluetooth_hci_uart_obj.timeout_char = 200;
-    MP_STATE_PORT(pyb_uart_obj_all)[mp_bluetooth_hci_uart_obj.uart_id - 1] = &mp_bluetooth_hci_uart_obj;
+    MP_STATE_PORT(machine_uart_obj_all)[mp_bluetooth_hci_uart_obj.uart_id - 1] = &mp_bluetooth_hci_uart_obj;
 
     // Initialise the UART.
     uart_init(&mp_bluetooth_hci_uart_obj, baudrate, UART_WORDLENGTH_8B, UART_PARITY_NONE, UART_STOPBITS_1, UART_HWCONTROL_RTS | UART_HWCONTROL_CTS);

@@ -87,7 +87,7 @@ void mp_emit_glue_assign_bytecode(mp_raw_code_t *rc, const byte *code,
     mp_prof_extract_prelude(code, prelude);
     #endif
 
-    #ifdef DEBUG_PRINT
+    #if DEBUG_PRINT
     #if !(MICROPY_PERSISTENT_CODE_SAVE || MICROPY_DEBUG_PRINTERS)
     const size_t len = 0;
     #endif
@@ -101,7 +101,6 @@ void mp_emit_glue_assign_native(mp_raw_code_t *rc, mp_raw_code_kind_t kind, void
     #if MICROPY_PERSISTENT_CODE_SAVE
     size_t n_children,
     uint16_t prelude_offset,
-    uint16_t n_qstr, mp_qstr_link_entry_t *qstr_link,
     #endif
     mp_uint_t scope_flags, mp_uint_t n_pos_args, mp_uint_t type_sig) {
 
@@ -144,15 +143,13 @@ void mp_emit_glue_assign_native(mp_raw_code_t *rc, mp_raw_code_kind_t kind, void
     #if MICROPY_PERSISTENT_CODE_SAVE
     rc->n_children = n_children;
     rc->prelude_offset = prelude_offset;
-    rc->n_qstr = n_qstr;
-    rc->qstr_link = qstr_link;
     #endif
 
     // These two entries are only needed for MP_CODE_NATIVE_ASM.
     rc->n_pos_args = n_pos_args;
     rc->type_sig = type_sig;
 
-    #ifdef DEBUG_PRINT
+    #if DEBUG_PRINT
     DEBUG_printf("assign native: kind=%d fun=%p len=" UINT_FMT " n_pos_args=" UINT_FMT " flags=%x\n", kind, fun_data, fun_len, n_pos_args, (uint)scope_flags);
     for (mp_uint_t i = 0; i < fun_len; i++) {
         if (i > 0 && i % 16 == 0) {
