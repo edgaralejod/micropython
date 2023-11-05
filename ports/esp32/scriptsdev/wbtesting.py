@@ -17,8 +17,8 @@ SDCard = machine.SDCard
 ADC = machine.ADC
 I2C = machine.I2C
 
-ssid = 'NETGEAR97'
-password = 'purpletrail985'
+ssid = 'ATTJ6nak8s'
+password = 'ghr8#34zjt6y'
 mqtt_server = '192.168.0.22'
 bmx_devid = 'E300000000'
 
