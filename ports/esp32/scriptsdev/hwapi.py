@@ -18,8 +18,8 @@ Pin = machine.Pin
 SDCard = machine.SDCard
 ADC = machine.ADC
 I2C = machine.I2C
-ssid = 'NETGEAR97'
-password = 'purpletrail985'
+ssid = 'ATTJ6nak8s'
+password = 'ghr8#34zjt6y'
 mqtt_server = 'REPLACE_WITH_YOUR_MQTT_BROKER_IP'
 bmx_token = 't*PAW)S3VMAx3O_Ug&'
 bmx_org = 'um5874'
@@ -61,13 +61,14 @@ def run_dacquisition(sensorSetting, afeGain, anChann, pgaSetting, freqStart, fre
     data['status'] = 'running'
     data['recSampSize'] = sampleSize
     mqqtdata = json.dumps(data)
-    client.publish(cfg.RUNTOPIC, mqqtdata, qos=0)
+    #client.publish(cfg.RUNTOPIC, mqqtdata, qos=0)
     waterbot.setAnalogSwitch( sensorSetting, afeGain, anChann )
     print(sampleSize)
     data['sweepData'] = waterbot.sweepCommand(pgaSetting, freqStart, freqInc, vSetting, sampleSize)
     mqqtdata = data['sweepData']
     mqqtdata = json.dumps(mqqtdata)
-    client.publish(topic, mqqtdata)
+    print(mqqtdata)
+    #client.publish(topic, mqqtdata)
     waterbot.clearSweepObject()
 
 #Callback that receives the message from the cloud.
@@ -149,6 +150,9 @@ def rec_callback(topic, msg):
     except Exception as e:
       print("Command Received Exception: " + str(e))
 
+print("About to connect to WIFI")
+waterbot.ad5934Init()
+run_dacquisition(72, 2, 16, 1, 3000, 100, 0, 2, cfg.ANINIT)
 station = network.WLAN(network.STA_IF)
 station.active(True)
 station.connect(ssid, password)
