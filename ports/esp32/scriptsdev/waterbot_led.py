@@ -11,7 +11,6 @@ class LEDColors:
     CYAN = "cyan"
     MAGENTA = "magenta"
     WHITE = "white"
-    OFF = "off"
 
 
 class WaterBotLED:
@@ -25,12 +24,13 @@ class WaterBotLED:
         self._green_led = green_led
         self._blue_led = blue_led
         self._blink_flag = False
+        self._toggle_flag = False
 
     def _blink_thread(self, color: str) -> None:
         while self._blink_flag:
-            self.led_color(color)
+            self.led_color_set(color)
             time.sleep(0.5)
-            self.led_color("off")
+            self.led_off()
             time.sleep(0.5)
 
     def start_blink(self, color: str) -> None:
@@ -40,14 +40,22 @@ class WaterBotLED:
 
     def stop_blink(self) -> None:
         self._blink_flag = False
-        self.turn_off_led()
+        self.led_color
 
-    def turn_off_led(self) -> None:
+    def led_off(self) -> None:
+        self._toggle_flag = False
         self._red_led.off()
         self._green_led.off()
         self._blue_led.off()
 
-    def led_color(self, color: LEDColors) -> None:
+    def led_color_toggle(self, color:LEDColors) -> None:
+        if self._toggle_flag:
+            self.led_off()
+        else:
+            self.led_color_set(color)
+
+    def led_color_set(self, color: LEDColors) -> None:
+        self._toggle_flag = True
         if color == LEDColors.RED:
             self._red_led.on()
             self._green_led.off()
@@ -76,9 +84,6 @@ class WaterBotLED:
             self._red_led.on()
             self._green_led.on()
             self._blue_led.on()
-        elif color == LEDColors.OFF:
-            self._red_led.off()
-            self._green_led.off()
-            self._blue_led.off()
+
         else:
             raise ValueError("Invalid color")

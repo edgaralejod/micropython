@@ -1,12 +1,12 @@
 from time import sleep
-import led
-
+from waterbot_led import WaterBotLED, LEDColors
+from machine import Pin, I2C # type: ignore
 
 # Class that encompasses the whole Data acquisition system logic.
 # This should be rewritten as a class that receives a ADG715 object and
 # a AD5934 Object.
 class Waterbot:
-    def __init__(self, i2c):
+    def __init__(self, i2c: I2C, red_led: Pin, green_led: Pin, blue_led: Pin):
         # Address of the AD5934 chip
         self.AD5934 = 0x0D
 
@@ -92,6 +92,7 @@ class Waterbot:
         # Declaring I2C bus
         self.i2c = i2c
 
+        self.led = WaterBotLED(red_led, green_led, blue_led)
     ##################################################################################
     # -------------------------------Device Functions---------------------------------#
     ##################################################################################
@@ -234,7 +235,7 @@ class Waterbot:
     # This method computes the impedance and it populates and creates the
     # data structures that then get sent to the cloud.
     def sweepIncrement(self):
-        led.led_toogle("yellow")
+        self.led.led_color_toggle(LEDColors.YELLOW)
         self.AD5934GetValues(self.AD5934_REG_REAL_DATA_HB, 4)
 
         # print(self.readValues)
@@ -274,7 +275,7 @@ class Waterbot:
         self.clearAndGetValue()
         self.sweepProcess()
         # sleep(0.2)
-        led.led_off()
+        self.led.led_off()
 
     def sweepProcess(self):
         hexcompare = self.readValues[0]
@@ -330,9 +331,9 @@ class Waterbot:
         # print("Setting Analog Switch")
 
     def sweepCommand(self, gain, startFreq, incFreq, voltage, incNum):
-        led.led_off()
-        led.led_color("yellow")
-        # print("On sweep Command")
+        self.led.led_off()
+        self.led.led_color_set(LEDColors.YELLOW)
+        print("On sweep Command")
         self.AD5934SetStartFrequency(startFreq)
         self.AD5934SetIncrementFrequency(incFreq)
         self.AD5934SetIncrementNumber(incNum)
@@ -341,7 +342,7 @@ class Waterbot:
         self.stFreqSetting = startFreq
         self.incFreqSetting = incFreq
         self.sweepInit()
-        led.led_color("green")
+        self.led.led_color_set(LEDColors.GREEN)
         # print(self.sweepData)
         return self.sweepData
 

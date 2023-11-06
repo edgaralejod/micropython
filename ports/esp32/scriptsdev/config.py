@@ -14,3 +14,8 @@ BATLTOPIC = 'iot-2/evt/battrd/fmt/json'
 DEEPSLP = 'iot-2/evt/deepslp/fmt/json'
 ANINIT = 'iot-2/evt/aninit/fmt/json'
 SUBSCRIBE = 'iot-2/cmd/+/fmt/json'
+
+wifi_config = {
+    'ssid':'ATTJ6nak8s',
+    'password':'ghr8#34zjt6y'
+}
