@@ -1,17 +1,7 @@
 import _thread
-from machine import Pin  # type: ignore
 import time
-
-
-class LEDColors:
-    RED = "red"
-    GREEN = "green"
-    BLUE = "blue"
-    YELLOW = "yellow"
-    CYAN = "cyan"
-    MAGENTA = "magenta"
-    WHITE = "white"
-
+from machine import Pin  # type: ignore
+from core.types.waterbot_types import LEDColors
 
 class WaterBotLED:
     def __init__(
@@ -48,7 +38,7 @@ class WaterBotLED:
         self._green_led.off()
         self._blue_led.off()
 
-    def led_color_toggle(self, color:LEDColors) -> None:
+    def led_color_toggle(self, color: LEDColors) -> None:
         if self._toggle_flag:
             self.led_off()
         else:

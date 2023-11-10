@@ -1,7 +1,7 @@
 
 import led
 import time
-from machine import *
+from machine import * #type: ignore
 import os
 
 ssid = "NETGEAR97"
